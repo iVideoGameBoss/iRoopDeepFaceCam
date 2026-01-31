@@ -1,6 +1,7 @@
 import glob
 import mimetypes
 import os
+import sys
 import platform
 import shutil
 import ssl
@@ -138,4 +139,18 @@ def conditional_download(download_directory_path: str, urls: List[str]) -> None:
 
 
 def resolve_relative_path(path: str) -> str:
+    """Resolve a path relative to the modules directory.
+
+    When running as a PyInstaller frozen exe, bundled data files (like ui.json)
+    live in sys._MEIPASS, while external files (like models/) are expected
+    alongside the executable.
+    """
+    if getattr(sys, 'frozen', False):
+        # First check inside the PyInstaller bundle (for bundled data files)
+        bundled_path = os.path.abspath(os.path.join(sys._MEIPASS, 'modules', path))
+        if os.path.exists(bundled_path):
+            return bundled_path
+        # Fall back to the exe's directory (for models, external files)
+        exe_dir = os.path.dirname(sys.executable)
+        return os.path.abspath(os.path.join(exe_dir, 'modules', path))
     return os.path.abspath(os.path.join(os.path.dirname(__file__), path))

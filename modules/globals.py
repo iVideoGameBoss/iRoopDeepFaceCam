@@ -1,7 +1,18 @@
 import os
+import sys
 from typing import List, Dict
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+# When running as a PyInstaller frozen executable, use the directory
+# containing the .exe as the root. Otherwise use the normal module path.
+if getattr(sys, 'frozen', False):
+    # Running as compiled exe - use the exe's directory
+    ROOT_DIR = os.path.dirname(sys.executable)
+    BUNDLE_DIR = sys._MEIPASS  # PyInstaller's temp extraction folder
+else:
+    # Running as normal Python script
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    BUNDLE_DIR = ROOT_DIR
+
 WORKFLOW_DIR = os.path.join(ROOT_DIR, 'workflow')
 
 file_types = [
